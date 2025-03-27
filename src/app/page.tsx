@@ -1,33 +1,63 @@
 "use client";
 
-import { useState } from "react";
+import { createTodo, deleteTodo, getTodos, updateTodo } from "@/services/api";
+import { useEffect, useState } from "react";
 
 const TodoApp = () => {
-  const [todos, setTodos] = useState([
-    { id: "1", text: "Learn Next.js", completed: false },
-    { id: "2", text: "Build a Todo App", completed: false },
-  ]);
+  const [todos, setTodos] = useState<{ id: string; text: string; completed: boolean }[]>([]);
   const [newTodo, setNewTodo] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  const addOrUpdateTodo = () => {
+  // Fetch todos when component mounts
+  useEffect(() => {
+    const fetchTodos = async () => {
+      try {
+        const fetchedTodos = await getTodos();
+        const normalizedTodos = fetchedTodos.map((todo: any) => ({
+          id: todo._id,
+          text: todo.text,
+          completed: todo.completed,
+        }));
+        setTodos(normalizedTodos);
+      } catch (error) {
+        console.error("Error fetching todos:", error);
+      }
+    };
+
+    fetchTodos();
+}, []);
+
+  // ADD or UPDATE
+  const addOrUpdateTodo = async () => {
     if (!newTodo.trim()) return;
+
     if (editingId) {
-      setTodos(
-        todos.map((todo) =>
-          todo.id === editingId ? { ...todo, text: newTodo } : todo
-        )
-      );
+      // update API
+      try {
+        await updateTodo(editingId, { title: newTodo });
+        setTodos(
+          todos.map((todo) =>
+            todo.id === editingId ? { ...todo, text: newTodo } : todo
+          )
+        );
+      } catch (error) {
+        console.error("Error updating todo:", error);
+      }
       setEditingId(null);
     } else {
-      setTodos([
-        ...todos,
-        { id: Date.now().toString(), text: newTodo, completed: false },
-      ]);
+      // create API
+      try {
+        const created = await createTodo({ text: newTodo, completed: false });
+        setTodos([...todos, created]); // assuming backend returns the created todo with id
+      } catch (error) {
+        console.error("Error creating todo:", error);
+      }
     }
+
     setNewTodo("");
   };
 
+  // TOGGLE
   const toggleTodo = (id: string) => {
     setTodos(
       todos.map((todo) =>
@@ -36,10 +66,17 @@ const TodoApp = () => {
     );
   };
 
-  const deleteTodo = (id: string) => {
-    setTodos(todos.filter((todo) => todo.id !== id));
+  // DELETE
+  const deleteTodoApi = async (id: string) => {
+    try {
+      await deleteTodo(id); // id will now be valid
+      setTodos(todos.filter((todo) => todo.id !== id));
+    } catch (error) {
+      console.error("Failed to delete todo:", error);
+    }
   };
 
+  // OPEN EDIT MODE
   const editTodo = (id: string, text: string) => {
     setEditingId(id);
     setNewTodo(text);
@@ -87,7 +124,7 @@ const TodoApp = () => {
                 Edit
               </button>
               <button
-                onClick={() => deleteTodo(todo.id)}
+                onClick={() => deleteTodoApi(todo.id)}
                 className="text-red-500 hover:text-red-700"
               >
                 &#10005;

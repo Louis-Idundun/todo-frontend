@@ -126,7 +126,7 @@ __turbopack_context__.s({
 });
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/axios/lib/axios.js [app-ssr] (ecmascript)");
 ;
-const API_BASE_URL = 'http://localhost:5000/todos'; //  Backend URL
+const API_BASE_URL = 'http://localhost:5000'; //  Backend URL
 const api = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].create({
     baseURL: API_BASE_URL,
     headers: {
@@ -134,19 +134,19 @@ const api = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axio
     }
 });
 const getTodos = async ()=>{
-    const response = await api.get('/');
+    const response = await api.get('/todos/fetch');
     return response.data;
 };
-const createTodo = async (todo)=>{
-    const response = await api.post('/', todo);
+const createTodo = async (params)=>{
+    const response = await api.post('/todos/create', params);
     return response.data;
 };
 const updateTodo = async (id, updatedTodo)=>{
-    const response = await api.put(`/${id}`, updatedTodo);
+    const response = await api.put(`/todos/update/${id}`, updatedTodo);
     return response.data;
 };
 const deleteTodo = async (id)=>{
-    await api.delete(`/${id}`);
+    await api.delete(`/todos/delete/${id}`);
 };
 }}),
 "[project]/src/app/page.tsx [app-ssr] (ecmascript)": ((__turbopack_context__) => {
@@ -155,97 +155,137 @@ const deleteTodo = async (id)=>{
 var { g: global, __dirname } = __turbopack_context__;
 {
 __turbopack_context__.s({
-    "default": (()=>Home)
+    "default": (()=>__TURBOPACK__default__export__)
 });
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react-jsx-dev-runtime.js [app-ssr] (ecmascript)");
-var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react.js [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/services/api.ts [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/server/route-modules/app-page/vendored/ssr/react.js [app-ssr] (ecmascript)");
 "use client";
 ;
 ;
 ;
-function Home() {
+const TodoApp = ()=>{
     const [todos, setTodos] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])([]);
     const [newTodo, setNewTodo] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("");
+    const [editingId, setEditingId] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
+    // Fetch todos when component mounts
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        const fetchTodos = async ()=>{
+            try {
+                const fetchedTodos = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["getTodos"])();
+                const normalizedTodos = fetchedTodos.map((todo)=>({
+                        id: todo._id,
+                        text: todo.text,
+                        completed: todo.completed
+                    }));
+                setTodos(normalizedTodos);
+            } catch (error) {
+                console.error("Error fetching todos:", error);
+            }
+        };
         fetchTodos();
     }, []);
-    const fetchTodos = async ()=>{
-        const data = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["getTodos"])();
-        setTodos(data.map((todo)=>({
-                id: todo._id,
-                text: todo.title,
-                completed: false
-            })));
-    };
-    const addTodo = ()=>{
+    // ADD or UPDATE
+    const addOrUpdateTodo = async ()=>{
         if (!newTodo.trim()) return;
-        setTodos([
-            ...todos,
-            {
-                id: Date.now().toString(),
-                text: newTodo,
-                completed: false
+        if (editingId) {
+            // update API
+            try {
+                await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["updateTodo"])(editingId, {
+                    title: newTodo
+                });
+                setTodos(todos.map((todo)=>todo.id === editingId ? {
+                        ...todo,
+                        text: newTodo
+                    } : todo));
+            } catch (error) {
+                console.error("Error updating todo:", error);
             }
-        ]);
+            setEditingId(null);
+        } else {
+            // create API
+            try {
+                const created = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["createTodo"])({
+                    text: newTodo,
+                    completed: false
+                });
+                setTodos([
+                    ...todos,
+                    created
+                ]); // assuming backend returns the created todo with id
+            } catch (error) {
+                console.error("Error creating todo:", error);
+            }
+        }
         setNewTodo("");
     };
+    // TOGGLE
     const toggleTodo = (id)=>{
         setTodos(todos.map((todo)=>todo.id === id ? {
                 ...todo,
                 completed: !todo.completed
             } : todo));
     };
-    const removeTodo = async (id)=>{
-        await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["deleteTodo"])(id);
-        fetchTodos();
+    // DELETE
+    const deleteTodoApi = async (id)=>{
+        try {
+            await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["deleteTodo"])(id); // id will now be valid
+            setTodos(todos.filter((todo)=>todo.id !== id));
+        } catch (error) {
+            console.error("Failed to delete todo:", error);
+        }
+    };
+    // OPEN EDIT MODE
+    const editTodo = (id, text)=>{
+        setEditingId(id);
+        setNewTodo(text);
     };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        className: "min-h-screen flex flex-col items-center justify-center bg-gray-100 p-6",
+        className: "min-h-screen flex flex-col items-center justify-center bg-fuchsia-50 p-6",
         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-            className: "w-full max-w-md bg-black p-6 rounded-lg shadow-lg",
+            className: "w-full max-w-md bg-gray-600 p-6 rounded-lg shadow-lg",
             children: [
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
-                    className: "text-2xl font-semibold text-center text-blue-600",
+                    className: "text-2xl font-semibold text-center text-green-600",
                     children: "Todo List"
                 }, void 0, false, {
                     fileName: "[project]/src/app/page.tsx",
-                    lineNumber: 48,
-                    columnNumber: 7
+                    lineNumber: 88,
+                    columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                     className: "mt-4 flex",
                     children: [
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                             type: "text",
-                            className: "flex-1 p-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                            className: "flex-1 p-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-green-500",
                             placeholder: "Add a new task...",
                             value: newTodo,
                             onChange: (e)=>setNewTodo(e.target.value)
                         }, void 0, false, {
                             fileName: "[project]/src/app/page.tsx",
-                            lineNumber: 50,
-                            columnNumber: 9
+                            lineNumber: 92,
+                            columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                            onClick: addTodo,
-                            className: "bg-blue-600 text-white px-4 py-2 rounded-r-md hover:bg-blue-700",
-                            children: "Add"
+                            onClick: addOrUpdateTodo,
+                            className: "bg-green-600 text-white px-4 py-2 rounded-r-md hover:bg-green-700",
+                            children: editingId ? "Update" : "Add"
                         }, void 0, false, {
                             fileName: "[project]/src/app/page.tsx",
-                            lineNumber: 57,
-                            columnNumber: 9
+                            lineNumber: 99,
+                            columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/app/page.tsx",
-                    lineNumber: 49,
-                    columnNumber: 7
+                    lineNumber: 91,
+                    columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
                     className: "mt-4 space-y-2",
                     children: todos.map((todo)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
-                            className: `flex justify-between items-center p-2 border rounded-md ${todo.completed ? "bg-blue-200 line-through" : ""}`,
+                            className: `flex justify-between items-center p-2 border rounded-md ${todo.completed ? "bg-gray-200 line-through" : ""}`,
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                     onClick: ()=>toggleTodo(todo.id),
@@ -253,41 +293,51 @@ function Home() {
                                     children: todo.text
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/page.tsx",
-                                    lineNumber: 70,
-                                    columnNumber: 13
+                                    lineNumber: 114,
+                                    columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                    onClick: ()=>(0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$services$2f$api$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["deleteTodo"])(todo.id),
+                                    onClick: ()=>editTodo(todo.id, todo.text),
+                                    className: "text-green-500 hover:text-green-700 mr-2",
+                                    children: "Edit"
+                                }, void 0, false, {
+                                    fileName: "[project]/src/app/page.tsx",
+                                    lineNumber: 120,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                    onClick: ()=>deleteTodoApi(todo.id),
                                     className: "text-red-500 hover:text-red-700",
                                     children: "✕"
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/page.tsx",
-                                    lineNumber: 76,
-                                    columnNumber: 13
+                                    lineNumber: 126,
+                                    columnNumber: 15
                                 }, this)
                             ]
                         }, todo.id, true, {
                             fileName: "[project]/src/app/page.tsx",
-                            lineNumber: 66,
-                            columnNumber: 11
+                            lineNumber: 108,
+                            columnNumber: 13
                         }, this))
                 }, void 0, false, {
                     fileName: "[project]/src/app/page.tsx",
-                    lineNumber: 64,
-                    columnNumber: 7
+                    lineNumber: 106,
+                    columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/app/page.tsx",
-            lineNumber: 47,
-            columnNumber: 5
+            lineNumber: 87,
+            columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/app/page.tsx",
-        lineNumber: 46,
+        lineNumber: 86,
         columnNumber: 5
     }, this);
-}
+};
+const __TURBOPACK__default__export__ = TodoApp;
 }}),
 
 };
