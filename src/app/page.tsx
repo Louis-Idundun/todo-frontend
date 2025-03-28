@@ -10,10 +10,16 @@ const TodoApp = () => {
 
   // Fetch todos when component mounts
   useEffect(() => {
+    interface Todo {
+      _id: string;
+      text: string;
+      completed: boolean;
+    }
+    
     const fetchTodos = async () => {
       try {
-        const fetchedTodos = await getTodos();
-        const normalizedTodos = fetchedTodos.map((todo: any) => ({
+        const fetchedTodos: Todo[] = await getTodos();
+        const normalizedTodos = fetchedTodos.map((todo) => ({
           id: todo._id,
           text: todo.text,
           completed: todo.completed,
