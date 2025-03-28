@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000'; //  Backend URL
+const API_BASE_URL = 'https://todo-backend-avpy.onrender.com'; //  Backend URL
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
